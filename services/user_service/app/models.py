@@ -16,3 +16,4 @@ class User(Base):
     last_name = Column(String(255), nullable=True)
     email = Column(String(255), nullable=True)
     profile_image = Column(String(512), nullable=True)
+    status = Column(Boolean, default=False)
