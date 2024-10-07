@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
-from common.database import engine
+from  common.database import engine
 from .models import Base
 from .routes import router as user_router
 
@@ -18,4 +18,4 @@ app.include_router(user_router)
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
