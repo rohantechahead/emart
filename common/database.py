@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from constant_helper import DATABASE_URL
+from .constant_helper import DATABASE_URL
 
 DATABASE_URL = DATABASE_URL
 
