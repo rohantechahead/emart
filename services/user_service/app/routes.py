@@ -19,6 +19,16 @@ def health_check():
 
 
 
+@router.get("/")
+def index():
+    return {"message": "hello welcome to User Services"}
+
+
+@router.get("/health")
+def index():
+    return {"message": "All well!!!"}
+
+
 @router.post("/signup")
 def signup(request: SignupRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.phone_number == request.phone_number).first()
@@ -30,6 +40,8 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
     return {"message": "OTP sent to your phone number"}
 
 
+#
+#
 @router.post("/verify-otp")
 def verify_otp_route(request: LoginRequest, db: Session = Depends(get_db)):
     if not verify_otp(db, request.phone_number, request.otp):
