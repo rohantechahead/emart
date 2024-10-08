@@ -3,6 +3,8 @@ from sqlalchemy.orm import sessionmaker
 
 from .constant_helper import DATABASE_URL
 
+
+
 DATABASE_URL = DATABASE_URL
 
 engine = create_engine(DATABASE_URL)
