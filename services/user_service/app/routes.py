@@ -15,7 +15,7 @@ def index():
 
 
 @router.get("/health")
-def index():
+def health_check():
     return {"message": "All well!!!"}
 
 
