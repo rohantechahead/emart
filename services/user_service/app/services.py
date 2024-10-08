@@ -1,5 +1,12 @@
 import random
+from datetime import datetime, timedelta
+import jwt
 from services.user_service.app.models import User
+
+SECRET_KEY = "22ea3d2d7418871717c3bf855db449849a9cd85a1350a9ef67f3e5f5aaa85f23"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 def generate_otp():
     """Generates a 6-digit OTP."""
@@ -37,3 +44,13 @@ def verify_otp(db, phone_number: str, otp: str):
         db.commit()
         return True
     return False
+
+def generate_access_tokens(user_id: int):
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    payload = {"sub": str(user_id), "exp": expire}
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+def generate_refresh_tokens(user_id: int):
+    expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    payload = {"sub": str(user_id), "exp": expire, "type": "refresh"}
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
