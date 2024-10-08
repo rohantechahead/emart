@@ -8,16 +8,6 @@ from services.user_service.app.services import create_user, verify_otp
 
 router = APIRouter()
 
-@router.get("/")
-def index():
-    return {"message": "hello welcome to User Services"}
-
-@router.get("/health")
-def health_check():
-    return {"message": "All well!!!"}
-
-
-
 
 @router.get("/")
 def index():
