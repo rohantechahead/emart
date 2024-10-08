@@ -2,11 +2,21 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from common.database import get_db
-from .models import User
-from .schemas import SignupRequest, LoginRequest
-from .services import create_user, verify_otp
+from services.user_service.app.models import User
+from services.user_service.app.schemas import SignupRequest, LoginRequest
+from services.user_service.app.services import create_user, verify_otp
 
 router = APIRouter()
+
+
+@router.get("/")
+def index():
+    return {"message": "hello welcome to User Services"}
+
+
+@router.get("/health")
+def health_check():
+    return {"message": "All well!!!"}
 
 
 @router.post("/signup")
@@ -20,6 +30,8 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
     return {"message": "OTP sent to your phone number"}
 
 
+#
+#
 @router.post("/verify-otp")
 def verify_otp_route(request: LoginRequest, db: Session = Depends(get_db)):
     if not verify_otp(db, request.phone_number, request.otp):
