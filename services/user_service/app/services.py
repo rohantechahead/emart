@@ -1,12 +1,9 @@
 import random
-
 from services.user_service.app.models import User
-
 
 def generate_otp():
     """Generates a 6-digit OTP."""
     return str(random.randint(100000, 999999))
-
 
 def send_otp(phone_number, otp):
     """
@@ -16,11 +13,9 @@ def send_otp(phone_number, otp):
     print(f"Sending OTP {otp} to {phone_number}")
     # Replace this with actual SMS sending logic
 
-
-def create_user(db, phone_number: str):
+def create_user(db, phone_number: str, otp: str):
     """Create a new user with phone number"""
     try:
-        otp = generate_otp()
         send_otp(phone_number, otp)
         user = User(phone_number=phone_number, otp=otp)
         db.add(user)
