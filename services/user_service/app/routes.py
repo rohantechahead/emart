@@ -16,6 +16,7 @@ router = APIRouter()
 def index():
     return {"message": "hello welcome to User Services"}
 
+
 @router.get("/health")
 def health_check():
     return {"message": "All well!!!"}
