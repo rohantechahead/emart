@@ -8,17 +8,19 @@ from services.user_service.app.schemas import SignupRequest, LoginRequest
 from services.user_service.app.services import create_user, verify_otp, send_otp, generate_otp, generate_access_tokens, \
     generate_refresh_tokens
 
-
 router = APIRouter()
 otp_to_send = STATIC_OTP if DEBUG else generate_otp()
+
 
 @router.get("/")
 def index():
     return {"message": "hello welcome to User Services"}
 
+
 @router.get("/health")
 def health_check():
     return {"message": "All well!!!"}
+
 
 @router.post("/signup")
 def signup(request: SignupRequest, db: Session = Depends(get_db)):
@@ -36,19 +38,17 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
 @router.post("/verify-otp")
 def verify_otp_route(request: LoginRequest, db: Session = Depends(get_db)):
     # Verify the OTP
-    if not verify_otp(db, request.phone_number, request.otp):
+    is_verified, user = verify_otp(db, request.phone_number, request.otp)
+    if not is_verified:
         raise HTTPException(status_code=400, detail="Invalid OTP")
 
-    # Fetch the user from the database based on the phone number
-    db_user = db.query(User).filter(User.phone_number == request.phone_number).first()
-
     # Check if the user exists
-    if not db_user:
+    if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
     # Generate access and refresh tokens using the user's ID
-    access_token = generate_access_tokens(db_user.id)
-    refresh_token = generate_refresh_tokens(db_user.id)
+    access_token = generate_access_tokens(user.id)
+    refresh_token = generate_refresh_tokens(user.id)
 
     # Return tokens as part of the response
     return {
@@ -56,4 +56,3 @@ def verify_otp_route(request: LoginRequest, db: Session = Depends(get_db)):
         "access_token": access_token,
         "refresh_token": refresh_token
     }
-
