@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, Date
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -17,3 +17,5 @@ class User(Base):
     email = Column(String(255), nullable=True)
     profile_image = Column(String(512), nullable=True)
     status = Column(Boolean, default=True)
+    dob = Column(Date, nullable=True)
+    gender = Column(String(10), nullable=True)

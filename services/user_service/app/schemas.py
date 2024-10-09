@@ -1,3 +1,5 @@
+from datetime import date
+
 from pydantic import BaseModel
 
 
@@ -15,3 +17,10 @@ class Response(BaseModel):
     otp: str
     access_token: str
     refresh_token: str
+
+class UpdateProfileRequest(BaseModel):
+    first_name: str
+    last_name: str
+    dob:date
+    gender:str
+   
