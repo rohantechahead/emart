@@ -1,6 +1,11 @@
 import random
 from datetime import datetime, timedelta, timezone
+from logging import exception
+
 import jwt
+from fastapi import HTTPException
+
+
 from common.constant_helper import SECRET_KEY_TOKENS, ALGORITHM, REFRESH_TOKEN_EXPIRE_DAYS, ACCESS_TOKEN_EXPIRE_MINUTES
 from services.user_service.app.models import User
 
@@ -55,3 +60,17 @@ def generate_refresh_tokens(user_id: int):
     expire = datetime.now(timezone.utc) + timedelta(days=int(REFRESH_TOKEN_EXPIRE_DAYS))
     payload = {"sub": str(user_id), "exp": expire, "type": "refresh"}
     return jwt.encode(payload, SECRET_KEY_TOKENS, algorithm=ALGORITHM)
+
+
+def get_current_user_id_from_token(Authorization: str):
+    try:
+        # Decode the JWT token to get the payload
+        payload = jwt.decode(Authorization, SECRET_KEY_TOKENS, algorithms=[ALGORITHM])
+        user_id: int = payload.get("sub")  # Get user ID from the payload
+
+        if user_id is None:
+            raise HTTPException(status_code=403, detail="Invalid token")
+
+        return user_id
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=403, detail="Could not validate credentials")

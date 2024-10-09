@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 from common.constant_helper import STATIC_OTP, DEBUG
 from common.database import get_db
 from services.user_service.app.models import User
-from services.user_service.app.schemas import SignupRequest, LoginRequest
+from services.user_service.app.schemas import SignupRequest, LoginRequest, UpdateProfileRequest
 from services.user_service.app.services import create_user, verify_otp, send_otp, generate_otp, generate_access_tokens, \
-    generate_refresh_tokens
+    generate_refresh_tokens, get_current_user_id_from_token
 
 router = APIRouter()
 otp_to_send = STATIC_OTP if DEBUG else generate_otp()
@@ -56,3 +56,28 @@ def verify_otp_route(request: LoginRequest, db: Session = Depends(get_db)):
         "access_token": access_token,
         "refresh_token": refresh_token
     }
+
+
+@router.put("/profile-update")
+def update_profile(request: UpdateProfileRequest,db: Session = Depends(get_db),user_id: int= Depends(get_current_user_id_from_token)):
+    user = db.query(User).filter(User.id == user_id).first()
+
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Update the user's profile with the provided fields
+    if request.first_name:
+        user.first_name = request.first_name
+    if request.last_name:
+        user.last_name = request.last_name
+    if request.gender:
+        user.gender = request.gender
+    if request.dob:
+        user.dob = request.dob
+
+    db.commit()  # Save changes to the database
+    db.refresh(user)  # Refresh the instance to get the latest data
+
+    return {"message": "Profile updated successfully", "user": user}
+
