@@ -1,9 +1,14 @@
 import random
+from datetime import datetime, timedelta, timezone
+import jwt
+from common.constant_helper import SECRET_KEY_TOKENS, ALGORITHM, REFRESH_TOKEN_EXPIRE_DAYS, ACCESS_TOKEN_EXPIRE_MINUTES
 from services.user_service.app.models import User
+
 
 def generate_otp():
     """Generates a 6-digit OTP."""
     return str(random.randint(100000, 999999))
+
 
 def send_otp(phone_number, otp):
     """
@@ -12,6 +17,7 @@ def send_otp(phone_number, otp):
     """
     print(f"Sending OTP {otp} to {phone_number}")
     # Replace this with actual SMS sending logic
+
 
 def create_user(db, phone_number: str, otp: str):
     """Create a new user with phone number"""
@@ -35,5 +41,17 @@ def verify_otp(db, phone_number: str, otp: str):
         user.is_otp_verified = True
         user.is_login = True
         db.commit()
-        return True
-    return False
+        return True, user
+    return False, None
+
+
+def generate_access_tokens(user_id: int):
+    expire = datetime.now(timezone.utc) + timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
+    payload = {"sub": str(user_id), "exp": expire}
+    return jwt.encode(payload, SECRET_KEY_TOKENS, algorithm=ALGORITHM)
+
+
+def generate_refresh_tokens(user_id: int):
+    expire = datetime.now(timezone.utc) + timedelta(days=int(REFRESH_TOKEN_EXPIRE_DAYS))
+    payload = {"sub": str(user_id), "exp": expire, "type": "refresh"}
+    return jwt.encode(payload, SECRET_KEY_TOKENS, algorithm=ALGORITHM)

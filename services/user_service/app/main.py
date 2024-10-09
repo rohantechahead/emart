@@ -1,6 +1,4 @@
-
 from fastapi import FastAPI
-
 from common.database import engine
 from .models import Base
 from .routes import router as user_router
