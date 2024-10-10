@@ -23,7 +23,8 @@ def upgrade() -> None:
     op.create_table('users',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('phone_number', sa.String(length=15), nullable=False),
-    sa.Column('otp', sa.String(length=6), nullable=True),
+    sa.Column
+('otp', sa.String(length=6), nullable=True),
     sa.Column('is_otp_verified', sa.Boolean(), nullable=True),
     sa.Column('is_login', sa.Boolean(), nullable=True),
     sa.Column('first_name', sa.String(length=255), nullable=True),
