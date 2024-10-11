@@ -74,7 +74,7 @@ def get_current_user_id_from_token(Authorization: str):
 
 def get_current_user_id(authorization: str = Header(None)):
     if not authorization:
-        
+
         raise HTTPException(status_code=403, detail="Authorization header missing")
 
     try:

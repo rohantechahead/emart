@@ -87,7 +87,7 @@ def update_profile(request: UpdateProfileRequest,db: Session = Depends(get_db),u
 def logout(user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """Log out the user by clearing the reference token."""
     user = db.query(User).filter(User.id == user_id).first()
-    print("user-->",user)
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
