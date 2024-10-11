@@ -1,10 +1,11 @@
 import random
 from datetime import datetime, timedelta, timezone
 from logging import exception
+from fastapi import Request
 
 import jwt
-from fastapi import HTTPException
-
+from fastapi import HTTPException, Header
+from sqlalchemy.dialects.postgresql import Any
 
 from common.constant_helper import SECRET_KEY_TOKENS, ALGORITHM, REFRESH_TOKEN_EXPIRE_DAYS, ACCESS_TOKEN_EXPIRE_MINUTES
 from services.user_service.app.models import User
@@ -73,4 +74,31 @@ def get_current_user_id_from_token(Authorization: str):
 
         return user_id
     except jwt.PyJWTError:
+        raise HTTPException(status_code=403, detail="Could not validate credentials")
+
+
+
+def get_current_user_id(authorization: str = Header(None), request: Request = None):
+    if not authorization:
+        # Log the headers received for debugging
+        raise HTTPException(status_code=403, detail="Authorization header missing")
+
+    try:
+        token_type, token = authorization.split()
+
+        if token_type.lower() != "bearer":
+            raise HTTPException(status_code=403, detail="Invalid token type")
+        print("inside get_current_user_id")
+
+        # Decode JWT to extract user_id
+        payload = jwt.decode(token, SECRET_KEY_TOKENS, algorithms=[ALGORITHM])
+        user_id: int = payload.get("sub")
+
+        if user_id is None:
+            raise HTTPException(status_code=403, detail="Invalid token: User ID not found in token")
+
+        return user_id
+
+    except (ValueError, jwt.PyJWTError) as e:
+        print("JWT decoding error:", str(e))
         raise HTTPException(status_code=403, detail="Could not validate credentials")

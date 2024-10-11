@@ -19,3 +19,5 @@ class User(Base):
     status = Column(Boolean, default=True)
     dob = Column(Date, nullable=True)
     gender = Column(String(10), nullable=True)
+    reference_token =Column(String(15),nullable=True)
+
