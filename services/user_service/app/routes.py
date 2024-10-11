@@ -6,7 +6,7 @@ from common.database import get_db
 from services.user_service.app.models import User
 from services.user_service.app.schemas import SignupRequest, LoginRequest, UpdateProfileRequest
 from services.user_service.app.services import create_user, verify_otp, send_otp, generate_otp, generate_access_tokens, \
-    generate_refresh_tokens, get_current_user_id_from_token
+    generate_refresh_tokens, get_current_user_id_from_token, get_current_user_id
 
 router = APIRouter()
 otp_to_send = STATIC_OTP if DEBUG else generate_otp()
@@ -49,6 +49,8 @@ def verify_otp_route(request: LoginRequest, db: Session = Depends(get_db)):
     # Generate access and refresh tokens using the user's ID
     access_token = generate_access_tokens(user.id)
     refresh_token = generate_refresh_tokens(user.id)
+    user.refresh_token = refresh_token
+    db.commit()
 
     # Return tokens as part of the response
     return {
@@ -81,3 +83,17 @@ def update_profile(request: UpdateProfileRequest,db: Session = Depends(get_db),u
 
     return {"message": "Profile updated successfully", "user": user}
 
+@router.put("/logout")
+def logout(user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """Log out the user by clearing the reference token."""
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Set the reference token to None
+    user.refresh_token = None
+    user.is_login = False
+    db.commit()
+
+    return {"message": "User logged out successfully"}
