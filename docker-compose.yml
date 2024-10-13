@@ -1,0 +1,17 @@
+version: '3'
+services:
+  user_service:
+    build:
+      dockerfile: ./services/user_service/Dockerfile
+    image: user_service:latest
+    container_name: user_service
+    ports:
+      - "8001:8001"  # Expose the FastAPI service on port 8001
+    volumes:
+      - ./services/user_service/app:/app  # Mount the app directory
+      - ./common:/app/common  # Mount the common directory
+      - ./requirements.txt:/app/requirements.txt  # Mount the requirements.txt file
+      - ./.env:/app/.env  # Mount the .env file
+    environment:
+      - PYTHONPATH=/app
+    command: bash -c "pip install --no-cache-dir -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8001"

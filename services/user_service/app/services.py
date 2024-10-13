@@ -58,10 +58,10 @@ def generate_refresh_tokens(user_id: int):
     return jwt.encode(payload, SECRET_KEY_TOKENS, algorithm=ALGORITHM)
 
 
-def get_current_user_id_from_token(Authorization: str):
+def get_current_user_id_from_token(authorization: str = Header(None)):
     try:
         # Decode the JWT token to get the payload
-        payload = jwt.decode(Authorization, SECRET_KEY_TOKENS, algorithms=[ALGORITHM])
+        payload = jwt.decode(authorization, SECRET_KEY_TOKENS, algorithms=[ALGORITHM])
         user_id: int = payload.get("sub")  # Get user ID from the payload
 
         if user_id is None:
@@ -72,21 +72,20 @@ def get_current_user_id_from_token(Authorization: str):
         raise HTTPException(status_code=403, detail="Could not validate credentials")
 
 
-def get_current_user_id(authorization: str = Header(None)):
-    if not authorization:
-
-        raise HTTPException(status_code=403, detail="Authorization header missing")
-
-    try:
-        token = authorization
-        payload = jwt.decode(token, SECRET_KEY_TOKENS, algorithms=[ALGORITHM])
-        user_id: int = payload.get("sub")
-
-        if user_id is None:
-            raise HTTPException(status_code=403, detail="Invalid token: User ID not found in token")
-
-        return user_id
-
-    except (ValueError, jwt.PyJWTError) as e:
-        print("JWT decoding error:", str(e))
-        raise HTTPException(status_code=403, detail="Could not validate credentials")
+# def get_current_user_id(authorization: str = Header(None)):
+#     if not authorization:
+#         raise HTTPException(status_code=403, detail="Authorization header missing")
+#
+#     try:
+#         token = authorization
+#         payload = jwt.decode(token, SECRET_KEY_TOKENS, algorithms=[ALGORITHM])
+#         user_id: int = payload.get("sub")
+#
+#         if user_id is None:
+#             raise HTTPException(status_code=403, detail="Invalid token: User ID not found in token")
+#
+#         return user_id
+#
+#     except (ValueError, jwt.PyJWTError) as e:
+#         print("JWT decoding error:", str(e))
+#         raise HTTPException(status_code=403, detail="Could not validate credentials")
