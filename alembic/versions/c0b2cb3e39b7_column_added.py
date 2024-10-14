@@ -1,8 +1,8 @@
-"""initial migration
+"""column added
 
-Revision ID: fbf577794fc4
+Revision ID: c0b2cb3e39b7
 Revises: 
-Create Date: 2024-10-11 12:09:33.907158
+Create Date: 2024-10-11 18:18:56.703658
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'fbf577794fc4'
+revision: str = 'c0b2cb3e39b7'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -33,6 +33,7 @@ def upgrade() -> None:
     sa.Column('status', sa.Boolean(), nullable=True),
     sa.Column('dob', sa.Date(), nullable=True),
     sa.Column('gender', sa.String(length=10), nullable=True),
+    sa.Column('refresh_token', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_phone_number'), 'users', ['phone_number'], unique=True)
