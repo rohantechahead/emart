@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -24,3 +25,12 @@ class UpdateProfileRequest(BaseModel):
     dob:date
     gender:str
    
+
+class AddressUpdate(BaseModel):
+    id: Optional[int] = None
+    address_type: str
+    street_address: str
+    state: str
+    country: str
+    zip_code: str
+    city: str

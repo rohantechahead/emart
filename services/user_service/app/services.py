@@ -1,9 +1,15 @@
 import random
 from datetime import datetime, timedelta, timezone
+
 import jwt
 from fastapi import HTTPException, Header
+from jwt import ExpiredSignatureError
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
 from common.constant_helper import SECRET_KEY_TOKENS, ALGORITHM, REFRESH_TOKEN_EXPIRE_DAYS, ACCESS_TOKEN_EXPIRE_MINUTES
-from services.user_service.app.models import User
+from services.user_service.app.models import User, UserAddress
+
 
 
 def generate_otp():
@@ -39,8 +45,10 @@ def verify_otp(db, phone_number: str, otp: str):
     """Verify the OTP entered by the user"""
     user = db.query(User).filter(User.phone_number == phone_number).first()
     if user and user.otp == otp:
-        user.is_otp_verified = True
+        user.is_verified = True
         user.is_login = True
+        user.is_login = True
+        user.otp = None
         db.commit()
         return True, user
     return False, None
@@ -58,28 +66,18 @@ def generate_refresh_tokens(user_id: int):
     return jwt.encode(payload, SECRET_KEY_TOKENS, algorithm=ALGORITHM)
 
 
-def get_current_user_id_from_token(Authorization: str):
-    try:
-        # Decode the JWT token to get the payload
-        payload = jwt.decode(Authorization, SECRET_KEY_TOKENS, algorithms=[ALGORITHM])
-        user_id: int = payload.get("sub")  # Get user ID from the payload
-
-        if user_id is None:
-            raise HTTPException(status_code=403, detail="Invalid token")
-
-        return user_id
-    except jwt.PyJWTError:
-        raise HTTPException(status_code=403, detail="Could not validate credentials")
 
 
-def get_current_user_id(authorization: str = Header(None)):
+def get_current_user_id_from_token(authorization: str = Header(None)):
+
     if not authorization:
-
         raise HTTPException(status_code=403, detail="Authorization header missing")
 
+
     try:
-        token = authorization
-        payload = jwt.decode(token, SECRET_KEY_TOKENS, algorithms=[ALGORITHM])
+
+        payload = jwt.decode(authorization, SECRET_KEY_TOKENS, algorithms=[ALGORITHM])
+
         user_id: int = payload.get("sub")
 
         if user_id is None:
@@ -87,6 +85,58 @@ def get_current_user_id(authorization: str = Header(None)):
 
         return user_id
 
+    except ExpiredSignatureError as e:
+        print("JWT decoding error:", str(e))
+        raise HTTPException(status_code=403, detail="Session expired please login again")
+
+
+
     except (ValueError, jwt.PyJWTError) as e:
         print("JWT decoding error:", str(e))
         raise HTTPException(status_code=403, detail="Could not validate credentials")
+
+
+def create_address(db: Session, user_id: int, address_type: str, street_address: str, city: str,
+                   state: str, country: str, zip_code: str):
+    # Create a new address for the user
+    new_address = UserAddress(user_id=user_id, address_type=address_type,
+                              street_address=street_address, city=city,
+                              state=state, country=country, zip_code=zip_code)
+    db.add(new_address)
+    db.commit()
+    db.refresh(new_address)  # Refresh to get the newly inserted data
+
+    return new_address
+def update_address(db: Session, user_id: int, address_id: int, address_type: str = None,
+                   street_address: str = None, city: str = None, state: str = None,
+                   country: str = None, zip_code: str = None):
+    # Fetch the address by ID and ensure it belongs to the user
+    address = db.query(UserAddress).filter(UserAddress.user_id == user_id,
+                                           UserAddress.id == address_id).first()
+
+    if not address:
+        return None  # Address not found
+
+    # Update address fields if they are provided
+    if address_type:
+        address.address_type = address_type
+    if street_address:
+        address.street_address = street_address
+    if city:
+        address.city = city
+    if state:
+        address.state = state
+    if country:
+        address.country = country
+    if zip_code:
+        address.zip_code = zip_code
+
+    # Update the timestamp
+    address.updated_at = func.now()
+
+    # Commit changes to the database
+    db.commit()
+    db.refresh(address)
+
+    return address
+
