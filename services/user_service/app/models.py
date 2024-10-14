@@ -1,8 +1,6 @@
-from pydantic_core.core_schema import nullable_schema
-from sqlalchemy import Column, Integer, String, Boolean, Date, column
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Boolean, Date
 
-Base = declarative_base()
+from common.database import Base
 
 
 class User(Base):
@@ -20,5 +18,4 @@ class User(Base):
     status = Column(Boolean, default=True)
     dob = Column(Date, nullable=True)
     gender = Column(String(10), nullable=True)
-    refresh_token=Column(String(255), nullable=True)
-
+    refresh_token = Column(String(255), nullable=True)
