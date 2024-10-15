@@ -1,6 +1,4 @@
 from datetime import date
-from typing import Optional
-
 from pydantic import BaseModel
 
 
@@ -35,3 +33,4 @@ class AddressUpdate(BaseModel):
     country: str
     zip_code: str
     city: str
+
