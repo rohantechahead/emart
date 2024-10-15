@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean, Date
+from datetime import datetime
+
+from sqlalchemy import Column, Integer, String, Boolean, Date, TIMESTAMP, ForeignKey
 
 from common.database import Base
 
@@ -19,3 +21,18 @@ class User(Base):
     dob = Column(Date, nullable=True)
     gender = Column(String(10), nullable=True)
     refresh_token = Column(String(255), nullable=True)
+
+
+class UserAddress(Base):
+    __tablename__ = 'useraddresses'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    address_type = Column(String(50), nullable=False)
+    street_address = Column(String(255), nullable=False)
+    city = Column(String(50), nullable=False)
+    state = Column(String(55), nullable=False)
+    country = Column(String(55), nullable=False)
+    zip_code = Column(String(10), nullable=False)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
