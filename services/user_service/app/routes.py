@@ -43,7 +43,7 @@ def verify_otp_route(request: LoginRequest, db: Session = Depends(get_db)):
 
     if not is_verified:
         raise HTTPException(status_code=400, detail="Invalid OTP")
-    print("verify otp")
+    
 
     # Check if the user exists
     if not user:
