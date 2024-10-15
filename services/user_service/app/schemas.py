@@ -12,22 +12,23 @@ class LoginRequest(BaseModel):
     phone_number: str
     otp: str
 
+
 class Response(BaseModel):
-    id:int
+    id: int
     phone_number: str
     otp: str
     access_token: str
     refresh_token: str
 
+
 class UpdateProfileRequest(BaseModel):
     first_name: str
     last_name: str
-    dob:date
-    gender:str
-   
+    dob: date
+    gender: str
+
 
 class AddressUpdate(BaseModel):
-    id: Optional[int] = None
     address_type: str
     street_address: str
     state: str

@@ -1,9 +1,8 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey, TIMESTAMP
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Boolean, Date, TIMESTAMP, ForeignKey
 
-Base = declarative_base()
+from common.database import Base
 
 
 class User(Base):

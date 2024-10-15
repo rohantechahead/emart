@@ -11,7 +11,6 @@ from common.constant_helper import SECRET_KEY_TOKENS, ALGORITHM, REFRESH_TOKEN_E
 from services.user_service.app.models import User, UserAddress
 
 
-
 def generate_otp():
     """Generates a 6-digit OTP."""
     return str(random.randint(100000, 999999))
@@ -66,18 +65,13 @@ def generate_refresh_tokens(user_id: int):
     return jwt.encode(payload, SECRET_KEY_TOKENS, algorithm=ALGORITHM)
 
 
-
-
 def get_current_user_id_from_token(authorization: str = Header(None)):
-
     if not authorization:
         raise HTTPException(status_code=403, detail="Authorization header missing")
-
 
     try:
 
         payload = jwt.decode(authorization, SECRET_KEY_TOKENS, algorithms=[ALGORITHM])
-
         user_id: int = payload.get("sub")
 
         if user_id is None:
@@ -107,6 +101,8 @@ def create_address(db: Session, user_id: int, address_type: str, street_address:
     db.refresh(new_address)  # Refresh to get the newly inserted data
 
     return new_address
+
+
 def update_address(db: Session, user_id: int, address_id: int, address_type: str = None,
                    street_address: str = None, city: str = None, state: str = None,
                    country: str = None, zip_code: str = None):
@@ -131,12 +127,8 @@ def update_address(db: Session, user_id: int, address_id: int, address_type: str
     if zip_code:
         address.zip_code = zip_code
 
-    # Update the timestamp
-    address.updated_at = func.now()
-
     # Commit changes to the database
     db.commit()
     db.refresh(address)
 
     return address
-
