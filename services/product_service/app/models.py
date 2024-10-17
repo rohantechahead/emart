@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from common.database import Base
 
+
 class ProductCategory(Base):
     __tablename__ = 'product_categories'
 

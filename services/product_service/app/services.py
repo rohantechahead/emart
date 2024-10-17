@@ -1,9 +1,7 @@
+from app import schemas
+from app.models import ProductCategory, Product, ProductImages
 from sqlalchemy.orm import Session
-
-from services.product_service.app import schemas
-from services.product_service.app.models import ProductCategory, Product, ProductImages
-from services.product_service.app.schemas import ProductCategoryCreate, ProductCategoryUpdate, ProductCreate, \
-    ProductUpdate
+from .schemas import ProductCategoryCreate, ProductCategoryUpdate, ProductCreate
 
 
 def create_category(db: Session, category: ProductCategoryCreate):
@@ -37,6 +35,7 @@ def search_category_by_name(db: Session, search_query: str = None):
         return db.query(ProductCategory).filter(ProductCategory.name.ilike(f'%{search_query}%')).all()
     return db.query(ProductCategory).all()
 
+
 def create_product(db: Session, product: ProductCreate):
     db_product = Product(
         name=product.name,
@@ -60,6 +59,7 @@ def save_product_images(product, image_urls, db):
         db.add(db_image)
     db.commit()
 
+
 def update_product_by_id(db: Session, product_id: int, product_update: schemas.ProductUpdate):
     db_product = db.query(Product).filter(Product.id == product_id).first()
 
@@ -76,6 +76,7 @@ def update_product_by_id(db: Session, product_id: int, product_update: schemas.P
     db.refresh(db_product)
 
     return db_product
+
 
 def delete_product(db: Session, product_id: int):
     db_product = db.query(Product).filter(Product.id == product_id).first()
