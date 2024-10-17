@@ -1,0 +1,72 @@
+IMPORTANT COMMANDS 
+
+
+1.FOR RUN IN GIT BASH 
+a. uvicorn app.main:app --reload --port 9000
+
+
+2.SQLAlchemy (if we are changing in the database then we need to run this)
+
+a. alembic revision --autogenerate -m "default false added"
+b. alembic upgrade head
+
+
+3.When you want to create environment
+
+a. python -m venv myenv
+b. source myenv/Scripts/activate(For Activates the env(here I create myenv))
+c..\venv\Scripts\activate(For windows Activates the env)
+
+
+4.Important command for GitHub
+#Important topics for revision 
+a.JWT tokens
+b.access token and refresh token
+
+
+
+5.Important command for GitHub
+
+a.
+ git status
+ git add .
+ git commit -m "add"
+ git pull origin main
+ git push origin <current branch name>
+ 
+ 
+ git checkout -b feature/user-services-setup            for new branch
+ git rename <old branch> <new branch name>              for rename
+
+codebasics,
+index and health check
+
+
+put api (profile update)
+firstname,lastname,dob,gender,image(as a string)
+use decorator for this for verity using access token
+
+
+product services
+
+create 
+categorie name
+
+update
+name 
+status
+
+delete
+by id
+
+serach 
+by tittle
+if not searching then get all categories
+
+for update
+by category id 
+we have to update product
+
+uvicorn app.main:app --port 8001 --reload
+
+

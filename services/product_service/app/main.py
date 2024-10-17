@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from common.database import engine
-from .models import Base
+
+from common.database import engine, Base
 from .routes import router as product_router
 
 app = FastAPI()

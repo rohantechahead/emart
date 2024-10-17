@@ -1,20 +1,19 @@
 from typing import List, Union
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-
-from common.database import get_db
-from services.product_service.app.schemas import ProductCategoryResponse, ProductCategoryCreate, ProductCategoryUpdate, \
+from app.schemas import ProductCategoryResponse, ProductCategoryCreate, ProductCategoryUpdate, \
     ProductCreate, ProductUpdateResponse, ProductUpdate, ProductResponse
-from services.product_service.app.services import create_category, update_category, delete_category, \
-    search_category_by_name, create_product, update_product_by_id, delete_product, get_products
+from common.database import get_db
+from .services import create_category, update_category, delete_category, search_category_by_name, create_product, \
+    update_product_by_id, delete_product, get_products
+
 
 router = APIRouter()
 
 
 @router.get("/")
 def index():
-    return {"message": "hello welcome to Product Services"}
+    return {"message": "hello welcome to Product"}
 
 
 @router.post("/categories/", response_model=ProductCategoryResponse)
