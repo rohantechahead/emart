@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-
 from common.constant_helper import STATIC_OTP, DEBUG
 from common.database import get_db
-from services.user_service.app.models import User
-from services.user_service.app.schemas import SignupRequest, LoginRequest, UpdateProfileRequest, AddressUpdate
-from services.user_service.app.services import create_user, verify_otp, send_otp, generate_otp, generate_access_tokens, \
-    generate_refresh_tokens, get_current_user_id_from_token, create_address, update_address
+from .models import User
+from .schemas import SignupRequest, LoginRequest, UpdateProfileRequest, AddressUpdate
+from .services import create_user, verify_otp, send_otp, generate_otp, generate_access_tokens, \
+    generate_refresh_tokens, get_current_user_id_from_token, create_address, update_address, show_user_detail
 
 router = APIRouter()
 
@@ -26,11 +25,12 @@ def health_check():
 @router.post("/signup")
 def signup(request: SignupRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.phone_number == request.phone_number).first()
-    new_user = False
     if not user:
-        new_user = create_user(db, request.phone_number, otp_to_send)
-    if not new_user:
+        user = create_user(db, request.phone_number, otp_to_send)
+    if not user:
         raise HTTPException(status_code=500, detail="Failed to create user")
+    user.otp = otp_to_send
+    db.commit()
     send_otp(request.phone_number, otp_to_send)
 
     return {"message": "OTP sent to your phone number"}
@@ -130,3 +130,12 @@ def update_existing_address(address_id: int, request: AddressUpdate,
         raise HTTPException(status_code=404, detail="Address not found")
 
     return {"message": "Address updated successfully", "address": updated_address}
+
+@router.get("/user-detail")
+def user_detail(db: Session = Depends(get_db),
+                user_id: int = Depends(get_current_user_id_from_token)):
+    # Call the show_user_detail service to get user details
+    user_info = show_user_detail(db, user_id)
+    if not user_info:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"user": user_info}
