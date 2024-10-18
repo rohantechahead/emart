@@ -1,14 +1,11 @@
 import random
 from datetime import datetime, timedelta, timezone
-
 import jwt
 from fastapi import HTTPException, Header
 from jwt import ExpiredSignatureError
-from sqlalchemy import func
 from sqlalchemy.orm import Session
-
 from common.constant_helper import SECRET_KEY_TOKENS, ALGORITHM, REFRESH_TOKEN_EXPIRE_DAYS, ACCESS_TOKEN_EXPIRE_MINUTES
-from services.user_service.app.models import User, UserAddress
+from .models import User, UserAddress
 
 
 def generate_otp():
@@ -29,7 +26,7 @@ def create_user(db, phone_number: str, otp: str):
     """Create a new user with phone number"""
     try:
         send_otp(phone_number, otp)
-        user = User(phone_number=phone_number, otp=otp)
+        user = User(phone_number=phone_number)
         db.add(user)
         db.commit()
         db.refresh(user)
@@ -132,3 +129,26 @@ def update_address(db: Session, user_id: int, address_id: int, address_type: str
     db.refresh(address)
 
     return address
+#
+def show_user_detail(db: Session, user_id: int):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return None
+    user_info = {
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "phone_number": user.phone_number,
+        "addresses": []
+    }
+    # Collect the user's addresses
+    addresses = db.query(UserAddress).filter(UserAddress.user_id == user_id).all()
+    for address in addresses:
+        user_info["addresses"].append({
+            "address_type": address.address_type,
+            "street_address": address.street_address,
+            "city": address.city,
+            "state": address.state,
+            "country": address.country,
+            "zip_code": address.zip_code
+        })
+    return user_info
