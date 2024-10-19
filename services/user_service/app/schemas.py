@@ -11,12 +11,19 @@ class LoginRequest(BaseModel):
     otp: str
 
 
-class Response(BaseModel):
+class UserProfileResponse(BaseModel):
     id: int
     phone_number: str
-    otp: str
-    access_token: str
-    refresh_token: str
+    first_name: str
+    last_name: str
+    dob: date
+    gender: str
+    is_otp_verified: bool
+    is_login: bool
+    profile_image: str | None
+
+    class Config:
+        from_attributes = True
 
 
 class UpdateProfileRequest(BaseModel):

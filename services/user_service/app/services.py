@@ -1,10 +1,7 @@
 import random
-from datetime import datetime, timedelta, timezone
-import jwt
-from fastapi import HTTPException, Header
-from jwt import ExpiredSignatureError
+
 from sqlalchemy.orm import Session
-from common.constant_helper import SECRET_KEY_TOKENS, ALGORITHM, REFRESH_TOKEN_EXPIRE_DAYS, ACCESS_TOKEN_EXPIRE_MINUTES
+
 from .models import User, UserAddress
 
 
@@ -41,50 +38,13 @@ def verify_otp(db, phone_number: str, otp: str):
     """Verify the OTP entered by the user"""
     user = db.query(User).filter(User.phone_number == phone_number).first()
     if user and user.otp == otp:
-        user.is_verified = True
+        user.is_otp_verified = True
         user.is_login = True
         user.is_login = True
         user.otp = None
         db.commit()
         return True, user
     return False, None
-
-
-def generate_access_tokens(user_id: int):
-    expire = datetime.now(timezone.utc) + timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
-    payload = {"sub": str(user_id), "exp": expire}
-    return jwt.encode(payload, SECRET_KEY_TOKENS, algorithm=ALGORITHM)
-
-
-def generate_refresh_tokens(user_id: int):
-    expire = datetime.now(timezone.utc) + timedelta(days=int(REFRESH_TOKEN_EXPIRE_DAYS))
-    payload = {"sub": str(user_id), "exp": expire, "type": "refresh"}
-    return jwt.encode(payload, SECRET_KEY_TOKENS, algorithm=ALGORITHM)
-
-
-def get_current_user_id_from_token(authorization: str = Header(None)):
-    if not authorization:
-        raise HTTPException(status_code=403, detail="Authorization header missing")
-
-    try:
-
-        payload = jwt.decode(authorization, SECRET_KEY_TOKENS, algorithms=[ALGORITHM])
-        user_id: int = payload.get("sub")
-
-        if user_id is None:
-            raise HTTPException(status_code=403, detail="Invalid token: User ID not found in token")
-
-        return user_id
-
-    except ExpiredSignatureError as e:
-        print("JWT decoding error:", str(e))
-        raise HTTPException(status_code=403, detail="Session expired please login again")
-
-
-
-    except (ValueError, jwt.PyJWTError) as e:
-        print("JWT decoding error:", str(e))
-        raise HTTPException(status_code=403, detail="Could not validate credentials")
 
 
 def create_address(db: Session, user_id: int, address_type: str, street_address: str, city: str,
@@ -129,6 +89,8 @@ def update_address(db: Session, user_id: int, address_id: int, address_type: str
     db.refresh(address)
 
     return address
+
+
 #
 def show_user_detail(db: Session, user_id: int):
     user = db.query(User).filter(User.id == user_id).first()
