@@ -1,14 +1,17 @@
 from datetime import datetime
+from sqlalchemy.ext.declarative import declarative_base
 
-from sqlalchemy import Column, Integer, String, Boolean, Date, TIMESTAMP, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Date, TIMESTAMP, ForeignKey, DateTime, text
 
-from common.database import Base
+# Define the Base for user_service
+UserServiceBase = declarative_base()
 
 
-class User(Base):
+class User(UserServiceBase):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(36), unique=True, nullable=False, index=True)
     phone_number = Column(String(15), unique=True, nullable=False, index=True)
     otp = Column(String(6), nullable=True)  # Storing the OTP temporarily
     is_otp_verified = Column(Boolean, default=False)  # OTP verified or not
@@ -21,9 +24,12 @@ class User(Base):
     dob = Column(Date, nullable=True)
     gender = Column(String(10), nullable=True)
     refresh_token = Column(String(255), nullable=True)
+    created_at = Column(DateTime, server_default=text('CURRENT_TIMESTAMP'), nullable=False)
+    updated_at = Column(DateTime, server_default=text('CURRENT_TIMESTAMP'), onupdate=text('CURRENT_TIMESTAMP'),
+                        nullable=False)
 
 
-class UserAddress(Base):
+class UserAddress(UserServiceBase):
     __tablename__ = 'useraddresses'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -34,5 +40,6 @@ class UserAddress(Base):
     state = Column(String(55), nullable=False)
     country = Column(String(55), nullable=False)
     zip_code = Column(String(10), nullable=False)
+    is_default = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)

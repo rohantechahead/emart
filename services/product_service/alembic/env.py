@@ -4,10 +4,11 @@ from logging.config import fileConfig
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 
-from services.user_service.app.models import UserServiceBase
+from common.database import DATABASE_URL
+from services.product_service.app.models import ProductServiceBase
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from common.constant_helper import DATABASE_URL
+
 from alembic import context
 
 database_url = DATABASE_URL
@@ -16,20 +17,21 @@ database_url = DATABASE_URL
 # access to the values within the .ini file in use.
 config = context.config
 
-# Set the database URL in Alembic's configuration
-config.set_main_option("sqlalchemy.url", database_url)
-
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+# Set the database URL in Alembic's configuration
+config.set_main_option("sqlalchemy.url", database_url)
+
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-# add UserService tables
-target_metadata = UserServiceBase.metadata
+
+# for ProductService tables this will help to track only product_service tables
+target_metadata = ProductServiceBase.metadata
 
 
 # other values from the config, defined by the needs of env.py,
@@ -56,7 +58,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        version_table="alembic_version_user_service"
+        version_table="alembic_version_product_service"
     )
 
     with context.begin_transaction():
@@ -79,7 +81,7 @@ def run_migrations_online() -> None:
     with connectable.connect() as connection:
         context.configure(
             connection=connection, target_metadata=target_metadata,
-            version_table="alembic_version_user_service"
+            version_table="alembic_version_product_service"
         )
 
         with context.begin_transaction():
