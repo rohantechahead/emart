@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
+from common.authentication_helper import generate_access_tokens, generate_refresh_tokens, get_current_user_id_from_token
 from common.constant_helper import STATIC_OTP, DEBUG
 from common.database import get_db
 from .models import User
-from .schemas import SignupRequest, LoginRequest, UpdateProfileRequest, AddressUpdate
-from .services import create_user, verify_otp, send_otp, generate_otp, generate_access_tokens, \
-    generate_refresh_tokens, get_current_user_id_from_token, create_address, update_address, show_user_detail
+from .schemas import SignupRequest, LoginRequest, UpdateProfileRequest, AddressUpdate, UserProfileResponse
+from .services import create_user, verify_otp, send_otp, generate_otp, create_address, update_address, show_user_detail
 
 router = APIRouter()
 
@@ -43,7 +44,6 @@ def verify_otp_route(request: LoginRequest, db: Session = Depends(get_db)):
 
     if not is_verified:
         raise HTTPException(status_code=400, detail="Invalid OTP")
-    
 
     # Check if the user exists
     if not user:
@@ -57,13 +57,13 @@ def verify_otp_route(request: LoginRequest, db: Session = Depends(get_db)):
 
     # Return tokens as part of the response
     return {
-        "message": "OTP verified, user logged in",
+        "user_id": user.id,
         "access_token": access_token,
         "refresh_token": refresh_token
     }
 
 
-@router.put("/profile-update")
+@router.put("/profile-update", response_model=UserProfileResponse)
 def update_profile(request: UpdateProfileRequest, db: Session = Depends(get_db),
                    user_id: int = Depends(get_current_user_id_from_token)):
     user = db.query(User).filter(User.id == user_id).first()
@@ -84,7 +84,7 @@ def update_profile(request: UpdateProfileRequest, db: Session = Depends(get_db),
     db.commit()  # Save changes to the database
     db.refresh(user)  # Refresh the instance to get the latest data
 
-    return {"message": "Profile updated successfully", "user": user}
+    return user
 
 
 @router.put("/logout")
@@ -130,6 +130,7 @@ def update_existing_address(address_id: int, request: AddressUpdate,
         raise HTTPException(status_code=404, detail="Address not found")
 
     return {"message": "Address updated successfully", "address": updated_address}
+
 
 @router.get("/user-detail")
 def user_detail(db: Session = Depends(get_db),

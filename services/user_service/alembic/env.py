@@ -1,18 +1,23 @@
+import os
+import sys
 from logging.config import fileConfig
 
-from alembic import context
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+
+from services.user_service.app.models import UserServiceBase
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
 from common.constant_helper import DATABASE_URL
-from services.user_service.app.models import Base
+from alembic import context
+
+database_url = DATABASE_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-# Override the sqlalchemy.url option in alembic.ini
-config.set_main_option('sqlalchemy.url', DATABASE_URL)
+# Set the database URL in Alembic's configuration
+config.set_main_option("sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -23,7 +28,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = Base.metadata
+# add UserService tables
+target_metadata = UserServiceBase.metadata
 
 
 # other values from the config, defined by the needs of env.py,
@@ -50,6 +56,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        version_table="alembic_version_user_service"
     )
 
     with context.begin_transaction():
@@ -71,7 +78,8 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, target_metadata=target_metadata,
+            version_table="alembic_version_user_service"
         )
 
         with context.begin_transaction():

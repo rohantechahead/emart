@@ -1,6 +1,7 @@
-from app import schemas
-from app.models import ProductCategory, Product, ProductImages
 from sqlalchemy.orm import Session
+
+from . import schemas
+from .models import ProductCategory, Product, ProductImages
 from .schemas import ProductCategoryCreate, ProductCategoryUpdate, ProductCreate
 
 

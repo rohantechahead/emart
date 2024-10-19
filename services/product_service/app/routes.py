@@ -1,12 +1,13 @@
 from typing import List, Union
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.schemas import ProductCategoryResponse, ProductCategoryCreate, ProductCategoryUpdate, \
-    ProductCreate, ProductUpdateResponse, ProductUpdate, ProductResponse
+
 from common.database import get_db
+from .schemas import ProductCategoryResponse, ProductCategoryCreate, ProductCategoryUpdate, ProductCreate, \
+    ProductUpdateResponse, ProductUpdate, ProductResponse
 from .services import create_category, update_category, delete_category, search_category_by_name, create_product, \
     update_product_by_id, delete_product, get_products
-
 
 router = APIRouter()
 
@@ -72,4 +73,4 @@ def search_products(product_id: int = None, db: Session = Depends(get_db)):
     if product_id is not None and product is None:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    return product if product_id is not None else product
+    return product
