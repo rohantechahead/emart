@@ -1,7 +1,13 @@
+import os
+import sys
+
 from fastapi import FastAPI
+
 from common.database import engine
 from .models import Base
 from .routes import router as user_router
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 app = FastAPI()
 

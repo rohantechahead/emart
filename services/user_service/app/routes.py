@@ -1,12 +1,12 @@
-from tokenize import generate_tokens
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
+from app.models import User
+from app.schemas import SignupRequest, LoginRequest, UpdateProfileRequest
+from app.services import create_user, verify_otp, send_otp, generate_otp, generate_access_tokens, \
+    generate_refresh_tokens, get_current_user_id_from_token, get_current_user_id
 from common.constant_helper import STATIC_OTP, DEBUG
 from common.database import get_db
-from services.user_service.app.models import User
-from services.user_service.app.schemas import SignupRequest, LoginRequest, UpdateProfileRequest
-from services.user_service.app.services import create_user, verify_otp, send_otp, generate_otp, generate_access_tokens, \
-    generate_refresh_tokens, get_current_user_id_from_token, get_current_user_id
 
 router = APIRouter()
 otp_to_send = STATIC_OTP if DEBUG else generate_otp()
@@ -61,9 +61,9 @@ def verify_otp_route(request: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.put("/profile-update")
-def update_profile(request: UpdateProfileRequest,db: Session = Depends(get_db),user_id: int= Depends(get_current_user_id_from_token)):
+def update_profile(request: UpdateProfileRequest, db: Session = Depends(get_db),
+                   user_id: int = Depends(get_current_user_id_from_token)):
     user = db.query(User).filter(User.id == user_id).first()
-
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -82,6 +82,7 @@ def update_profile(request: UpdateProfileRequest,db: Session = Depends(get_db),u
     db.refresh(user)  # Refresh the instance to get the latest data
 
     return {"message": "Profile updated successfully", "user": user}
+
 
 @router.put("/logout")
 def logout(user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):

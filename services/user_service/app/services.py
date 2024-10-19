@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from fastapi import HTTPException, Header
 from common.constant_helper import SECRET_KEY_TOKENS, ALGORITHM, REFRESH_TOKEN_EXPIRE_DAYS, ACCESS_TOKEN_EXPIRE_MINUTES
-from services.user_service.app.models import User
+from app.models import User
 
 
 def generate_otp():
