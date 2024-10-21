@@ -1,8 +1,6 @@
 from typing import List, Union, Optional
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-
 from common.common_message import Message
 from common.database import get_db
 from .models import Product
@@ -15,16 +13,13 @@ common_message = Message()
 
 router = APIRouter()
 
-
 @router.get("/")
 def index():
     return {common_message.product_greet}
 
-
 @router.post("/categories/", response_model=ProductCategoryResponse)
 def create_product_category(category: ProductCategoryCreate, db: Session = Depends(get_db)):
     return create_category(db, category)
-
 
 @router.put("/Update-categories/{category_id}", response_model=ProductCategoryResponse)
 def update_product_category(category_id: int, category_update: ProductCategoryUpdate, db: Session = Depends(get_db)):
@@ -32,7 +27,6 @@ def update_product_category(category_id: int, category_update: ProductCategoryUp
     if category is None:
         raise HTTPException(status_code=404, detail="Category not found")
     return category
-
 
 @router.delete("/Delete-categories/{category_id}")
 def delete_product_category(category_id: int, db: Session = Depends(get_db)):
@@ -52,7 +46,6 @@ def create_new_product(product: ProductCreate, db: Session = Depends(get_db)):
     create_product(db, product)
     return {common_message.product_create}
 
-
 @router.put("/products/update/{product_id}", response_model=ProductUpdateResponse)
 def update_product(product_id: int, product_update: ProductUpdate, db: Session = Depends(get_db)):
     product = update_product_by_id(db, product_id, product_update)
@@ -60,7 +53,6 @@ def update_product(product_id: int, product_update: ProductUpdate, db: Session =
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found for the given product ID")
     return product
-
 
 @router.delete("/Delete-products/{product_id}")
 def delete_product_item(product_id: int, db: Session = Depends(get_db)):
@@ -70,7 +62,6 @@ def delete_product_item(product_id: int, db: Session = Depends(get_db)):
 
     return {common_message.delete_message}
 
-
 @router.get("/products", response_model=Union[ProductResponse, List[ProductResponse]])
 def search_products(product_id: int = None, db: Session = Depends(get_db)):
     product = get_products(db, product_id)
@@ -78,7 +69,6 @@ def search_products(product_id: int = None, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Product not found")
 
     return product
-
 
 @router.get("/user/product-search/", response_model=Union[ProductResponse, List[ProductResponse]])
 def product_search_by_filter(

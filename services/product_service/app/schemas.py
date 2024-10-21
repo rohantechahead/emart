@@ -1,22 +1,17 @@
 from typing import List
-
 from pydantic import BaseModel
-
 
 class ProductCategoryCreate(BaseModel):
     name: str
-
 
 class ProductCategoryUpdate(BaseModel):
     name: str
     status: bool
 
-
 class ProductCategoryResponse(BaseModel):
     id: int
     name: str
     status: bool
-
 
 class ProductCreate(BaseModel):
     name: str
@@ -27,7 +22,6 @@ class ProductCreate(BaseModel):
     status: bool
     image_urls: List[str]
 
-
 class ProductUpdate(BaseModel):
     name: str
     description: str
@@ -36,7 +30,6 @@ class ProductUpdate(BaseModel):
     category_id: int
     status: bool
 
-
 class ProductUpdateResponse(BaseModel):
     name: str
     description: str
@@ -44,7 +37,6 @@ class ProductUpdateResponse(BaseModel):
     stock_quantity: int
     category_id: int
     status: bool
-
 
 class ProductResponse(BaseModel):
     id: int
