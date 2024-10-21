@@ -1,26 +1,29 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from common.authentication_helper import generate_access_tokens, generate_refresh_tokens, get_current_user_id_from_token
+from common.authentication_helper import get_current_user_id_from_token, generate_access_tokens, generate_refresh_tokens
+from common.common_message import Message
 from common.constant_helper import STATIC_OTP, DEBUG
 from common.database import get_db
 from .models import User
-from .schemas import SignupRequest, LoginRequest, UpdateProfileRequest, AddressUpdate, UserProfileResponse
-from .services import create_user, verify_otp, send_otp, generate_otp, create_address, update_address, show_user_detail
+from .schemas.request_schemas import SignupRequest, LoginRequest, UpdateProfileRequest
+from .schemas.response_schemas import UserProfileResponse, AddressUpdate
+from .services import create_user, send_otp, generate_otp, update_address, show_user_detail, verify_otp, create_address
 
 router = APIRouter()
+common_message = Message()
 
 otp_to_send = STATIC_OTP if DEBUG else generate_otp()
 
 
 @router.get("/")
 def index():
-    return {"message": "hello welcome to User Services"}
+    return {common_message.user_greet}
 
 
 @router.get("/health")
 def health_check():
-    return {"message": "All well!!!"}
+    return {common_message.all_well}
 
 
 @router.post("/signup")
@@ -34,7 +37,7 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
     db.commit()
     send_otp(request.phone_number, otp_to_send)
 
-    return {"message": "OTP sent to your phone number"}
+    return {common_message.otp_message}
 
 
 @router.post("/verify-otp")
@@ -100,7 +103,7 @@ def logout(user_id: int = Depends(get_current_user_id_from_token), db: Session =
     user.is_login = False
     db.commit()
 
-    return {"message": "User logged out successfully"}
+    return {common_message.logout_message}
 
 
 @router.post("/create-address")
@@ -112,7 +115,7 @@ def create_new_address(request: AddressUpdate, db: Session = Depends(get_db),
         state=request.state, country=request.country, zip_code=request.zip_code
     )
 
-    return {"message": "Address created successfully", "address": new_address}
+    return {common_message.create_message: new_address}
 
 
 @router.put("/update-address/{address_id}")
@@ -129,7 +132,7 @@ def update_existing_address(address_id: int, request: AddressUpdate,
     if updated_address is None:
         raise HTTPException(status_code=404, detail="Address not found")
 
-    return {"message": "Address updated successfully", "address": updated_address}
+    return {common_message.update_message: updated_address}
 
 
 @router.get("/user-detail")
