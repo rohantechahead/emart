@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import Depends,APIRouter
 from sqlalchemy.orm import Session
 from common.database import get_db
@@ -24,3 +26,7 @@ def add_to_cart(item: CartItemCreate, db: Session = Depends(get_db), user_id: in
     db.refresh(cart_item)
     return cart_item
 
+@router.get("view-cart", response_model=List[CartItem])
+def get_cart_items(db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id)):
+    cart_items = db.query(models.Cart).filter(models.Cart.user_id == user_id).all()
+    return cart_items
