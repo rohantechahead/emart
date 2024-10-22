@@ -1,4 +1,5 @@
 import random
+import uuid
 
 from sqlalchemy.orm import Session
 
@@ -22,8 +23,10 @@ def send_otp(phone_number, otp):
 def create_user(db, phone_number: str, otp: str):
     """Create a new user with phone number"""
     try:
+        print("uuid>--",str(uuid.uuid4()))
+        print("length of uuid>--",len(str(uuid.uuid4())))
         send_otp(phone_number, otp)
-        user = User(phone_number=phone_number)
+        user = User(phone_number=phone_number,uuid=str(uuid.uuid4()))
         db.add(user)
         db.commit()
         db.refresh(user)
