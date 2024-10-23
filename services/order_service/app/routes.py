@@ -2,7 +2,9 @@ from typing import List
 from fastapi import Depends, APIRouter
 from sqlalchemy.orm import Session
 from common.database import get_db
-from services.order_service.app.schemas import CartItemCreate, CartItem
+from services.order_service.app.schemas.request_schemas import CartItemCreate
+from services.order_service.app.schemas.response_schemas import CartItem
+
 from services.order_service.app.services import get_current_user_id, get_user_cart_items, remove_cart_item, \
     add_or_update_cart_item
 
