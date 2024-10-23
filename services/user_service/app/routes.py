@@ -116,7 +116,7 @@ def create_new_address(request: AddressUpdate, db: Session = Depends(get_db),
 def update_existing_address(address_id: int, request: Address,
                             db: Session = Depends(get_db),
                             user_id: int = Depends(get_current_user_id_from_token)):
-    print("address_id", address_id)
+
     updated_address = update_address(db, user_id=user_id, address_id=address_id, **request.dict())
     if updated_address is None:
         raise HTTPException(status_code=404, detail=common_message.add_missing)
