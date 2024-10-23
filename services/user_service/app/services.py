@@ -16,15 +16,16 @@ def send_otp(phone_number, otp):
     Simulates sending the OTP to the user's phone.
     Replace this with an SMS gateway like Twilio or AWS SNS.
     """
-    print(f"Sending OTP {otp} to {phone_number}")
+    print(f"Sending OTP {otp} to +{phone_number}")
+
     # Replace this with actual SMS sending logic
 
 
-def create_user(db, phone_number: str, otp: str):
+def create_user(db, phone_number: str, otp: str, country_code: str):
     """Create a new user with phone number"""
     try:
         send_otp(phone_number, otp)
-        user = User(phone_number=phone_number, uuid=str(uuid.uuid4()))
+        user = User(phone_number=phone_number, country_code=country_code, uuid=str(uuid.uuid4()))
         db.add(user)
         db.commit()
         db.refresh(user)
@@ -35,9 +36,9 @@ def create_user(db, phone_number: str, otp: str):
         return None
 
 
-def verify_otp(db, phone_number: str, otp: str):
+def verify_otp(db, phone_number: str, otp: str, country_code: str):
     """Verify the OTP entered by the user"""
-    user = db.query(User).filter(User.phone_number == phone_number).first()
+    user = db.query(User).filter(User.phone_number == phone_number, User.country_code == country_code).first()
     if user and user.otp == otp:
         user.is_otp_verified = True
         user.is_login = True
@@ -92,21 +93,29 @@ def update_address(db: Session, user_id: int, address_id: int, address_type: str
     return address
 
 
-#
 def show_user_detail(db: Session, user_id: int):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         return None
     user_info = {
+        "id": user.id,
         "first_name": user.first_name,
         "last_name": user.last_name,
         "phone_number": user.phone_number,
+        "country_code": user.country_code,
+        "dob": user.dob,  # Optional, make sure it is provided in the response model
+        "gender": user.gender,  # Optional
+        "is_otp_verified": user.is_otp_verified,
+        "is_login": user.is_login,
+        "profile_image": user.profile_image,  # Optional, include if applicable
         "addresses": []
     }
     # Collect the user's addresses
     addresses = db.query(UserAddress).filter(UserAddress.user_id == user_id).all()
     for address in addresses:
         user_info["addresses"].append({
+
+            "id": address.id,
             "address_type": address.address_type,
             "street_address": address.street_address,
             "city": address.city,

@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Session
 
-from . import schemas
 from .models import ProductCategory, Product, ProductImages
-from .schemas import ProductCategoryCreate, ProductCategoryUpdate, ProductCreate
+from .schemas.request_schemas import ProductCategoryCreate, ProductCategoryUpdate, ProductCreate, ProductUpdate
 
 
 def create_category(db: Session, category: ProductCategoryCreate):
@@ -61,7 +60,7 @@ def save_product_images(product, image_urls, db):
     db.commit()
 
 
-def update_product_by_id(db: Session, product_id: int, product_update: schemas.ProductUpdate):
+def update_product_by_id(db: Session, product_id: int, product_update: ProductUpdate):
     db_product = db.query(Product).filter(Product.id == product_id).first()
 
     if not db_product:

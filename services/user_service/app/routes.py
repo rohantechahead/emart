@@ -6,8 +6,8 @@ from common.common_message import Message
 from common.constant_helper import STATIC_OTP, DEBUG
 from common.database import get_db
 from .models import User
-from .schemas.request_schemas import SignupRequest, LoginRequest, UpdateProfileRequest
-from .schemas.response_schemas import UserProfileResponse, AddressUpdate
+from .schemas.request_schemas import SignupRequest, LoginRequest, UpdateProfileRequest, Address
+from .schemas.response_schemas import UserProfileResponse, AddressUpdate, OTPVerificationResponse, ProfileUpdateResponse
 from .services import create_user, send_otp, generate_otp, update_address, show_user_detail, verify_otp, create_address
 
 router = APIRouter()
@@ -30,49 +30,41 @@ def health_check():
 def signup(request: SignupRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.phone_number == request.phone_number).first()
     if not user:
-        user = create_user(db, request.phone_number, otp_to_send)
+        user = create_user(db, request.phone_number, otp_to_send, request.country_code)
     if not user:
-        raise HTTPException(status_code=500, detail="Failed to create user")
+        raise HTTPException(status_code=500, detail=common_message.fail_message)
     user.otp = otp_to_send
     db.commit()
-    send_otp(request.phone_number, otp_to_send)
+    send_otp(f"{request.country_code}{request.phone_number}", otp_to_send)
 
     return {common_message.otp_message}
 
 
-@router.post("/verify-otp")
+@router.post("/verify-otp", response_model=OTPVerificationResponse)
 def verify_otp_route(request: LoginRequest, db: Session = Depends(get_db)):
-    # Verify the OTP
-    is_verified, user = verify_otp(db, request.phone_number, request.otp)
+
+    is_verified, user = verify_otp(db, request.phone_number, request.otp, request.country_code)
 
     if not is_verified:
-        raise HTTPException(status_code=400, detail="Invalid OTP")
-
-    # Check if the user exists
+        raise HTTPException(status_code=400, detail=common_message.invalid_otp)
     if not user:
-        raise HTTPException(status_code=404, detail="invalid user")
+        raise HTTPException(status_code=404, detail=common_message.user_detail)
 
-    # Generate access and refresh tokens using the user's ID
     access_token = generate_access_tokens(user.id)
     refresh_token = generate_refresh_tokens(user.id)
     user.refresh_token = refresh_token
     db.commit()
 
-    # Return tokens as part of the response
-    return {
-        "user_id": user.id,
-        "access_token": access_token,
-        "refresh_token": refresh_token
-    }
+    return {"user_id": user.id, "access_token": access_token, "refresh_token": refresh_token}
 
 
-@router.put("/profile-update", response_model=UserProfileResponse)
+@router.put("/profile-update", response_model=ProfileUpdateResponse)
 def update_profile(request: UpdateProfileRequest, db: Session = Depends(get_db),
                    user_id: int = Depends(get_current_user_id_from_token)):
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail=common_message.user_detail)
 
     # Update the user's profile with the provided fields
     if request.first_name:
@@ -96,7 +88,7 @@ def logout(user_id: int = Depends(get_current_user_id_from_token), db: Session =
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail=common_message.user_detail)
 
     # Set the reference token to None
     user.refresh_token = None
@@ -109,37 +101,31 @@ def logout(user_id: int = Depends(get_current_user_id_from_token), db: Session =
 @router.post("/create-address")
 def create_new_address(request: AddressUpdate, db: Session = Depends(get_db),
                        user_id: int = Depends(get_current_user_id_from_token)):
-    new_address = create_address(
+    # Call the create_address function
+    create_address(
         db, user_id=user_id, address_type=request.address_type,
         street_address=request.street_address, city=request.city,
         state=request.state, country=request.country, zip_code=request.zip_code
     )
 
-    return {common_message.create_message: new_address}
+
+    return {common_message.create_message}
 
 
-@router.put("/update-address/{address_id}")
-def update_existing_address(address_id: int, request: AddressUpdate,
+@router.put("/update-address/{address_id}", response_model=Address)
+def update_existing_address(address_id: int, request: Address,
                             db: Session = Depends(get_db),
                             user_id: int = Depends(get_current_user_id_from_token)):
-    updated_address = update_address(
-        db, user_id=user_id, address_id=address_id,
-        address_type=request.address_type, street_address=request.street_address,
-        city=request.city, state=request.state, country=request.country,
-        zip_code=request.zip_code
-    )
-
+    print("address_id", address_id)
+    updated_address = update_address(db, user_id=user_id, address_id=address_id, **request.dict())
     if updated_address is None:
-        raise HTTPException(status_code=404, detail="Address not found")
+        raise HTTPException(status_code=404, detail=common_message.add_missing)
+    return updated_address
 
-    return {common_message.update_message: updated_address}
 
-
-@router.get("/user-detail")
-def user_detail(db: Session = Depends(get_db),
-                user_id: int = Depends(get_current_user_id_from_token)):
-    # Call the show_user_detail service to get user details
+@router.get("/user-detail", response_model=UserProfileResponse)
+def user_detail(db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id_from_token)):
     user_info = show_user_detail(db, user_id)
     if not user_info:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"user": user_info}
+        raise HTTPException(status_code=404, detail=common_message.user_detail)
+    return user_info

@@ -13,6 +13,7 @@ class User(UserServiceBase):
     id = Column(Integer, primary_key=True, autoincrement=True)
     uuid = Column(String(36), unique=True, nullable=False, index=True)
     phone_number = Column(String(15), unique=True, nullable=False, index=True)
+    country_code = Column(String(10), default="91")
     otp = Column(String(6), nullable=True)  # Storing the OTP temporarily
     is_otp_verified = Column(Boolean, default=False)  # OTP verified or not
     is_login = Column(Boolean, default=False)  # Tracking if the user is logged in

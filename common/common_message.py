@@ -1,7 +1,4 @@
 class Message:
-    # def __init__(self, message):
-    #     self.message = message
-
     user_greet = "hello welcome to User Services"
     all_well = "All well!!!"
     otp_message = "OTP sent to your phone number"
@@ -12,3 +9,12 @@ class Message:
     product_create = "Product created successfully"
     category_delete = "Category deleted successfully "
     product_greet = "hello welcome to Product"
+    detail = "Category not found"
+    update_detail = "Product not found for the given product ID"
+    search_detail = "Product not found"
+    id_missing_detail= "Invalid category ID"
+    user_detail = "User not found"
+    add_missing = "Address not found"
+    invalid_otp = "Invalid OTP"
+    fail_message = "Failed to create user"
+
