@@ -3,10 +3,10 @@ from fastapi import Depends, APIRouter
 from sqlalchemy.orm import Session
 from common.database import get_db
 from services.order_service.app.schemas.request_schemas import CartItemCreate
-from services.order_service.app.schemas.response_schemas import CartItem
+from services.order_service.app.schemas.response_schemas import CartItem, OrderResponse
 
 from services.order_service.app.services import get_current_user_id, get_user_cart_items, remove_cart_item, \
-    add_or_update_cart_item
+    add_or_update_cart_item, place_order_from_cart
 
 router = APIRouter()
 
@@ -24,3 +24,8 @@ def view_cart_items(db: Session = Depends(get_db), user_id: int = Depends(get_cu
 def remove_cart_item_route(product_id: int, db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id)):
     return remove_cart_item(db, user_id, product_id)
 
+
+@router.post("/place-order", response_model=OrderResponse)
+async def place_order(db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id)):
+    order = await place_order_from_cart(db, user_id)
+    return order
