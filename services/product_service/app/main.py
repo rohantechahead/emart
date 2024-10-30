@@ -1,12 +1,10 @@
 import os
 import sys
 
-from fastapi import FastAPI
-
 # keep this import first
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 
-
+from fastapi import FastAPI
 from common.database import engine
 from services.product_service.app.models import ProductServiceBase
 from .routes import router as product_router
